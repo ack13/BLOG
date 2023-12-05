@@ -3,7 +3,20 @@ const app=express();
 const cors=require('cors');
 const mongoose=require('mongoose')
 const User=require('./models/User');
-app.use(cors({credentials:true,origin:'*'}));
+// app.use(cors({credentials:true,origin:'http://localhost:3000'}));
+// app.use(cors());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    if (req.method === 'OPTIONS') {
+      res.status(200).send();
+    } else {
+      next();
+    }
+  });
+  
 const bcrypt=require("bcryptjs");
 app.use(express.json());
 const salt=bcrypt.genSaltSync(10);
@@ -14,6 +27,7 @@ const multer=require('multer');
 const Post=require('./models/Post');
 const uploadMiddleWare=multer({dest:'uploads/'});
 const fs=require('fs');
+const { log } = require('console');
 app.use(cookieParser());
 app.use(express.static('uploads'));
 app.use('/uploads',express.static(__dirname+'/uploads'));
@@ -38,6 +52,7 @@ app.post('/register',async(req,res)=>{
 });
 
 app.post('/login',async(req,res)=>{
+    // console.log("asd");
     const {username,password}=req.body;
     const userDoc=await User.findOne({username});
    const passOk=bcrypt.compareSync(password,userDoc.password);
@@ -60,6 +75,7 @@ else{
 console.log("Server Running"); 
 
 app.get('/profile',(req,res)=>{
+    // console.log("hi");
     const {token}=req.cookies;
     jwt.verify(token,secret,{},(err,info)=>{
         if(err)throw err;
@@ -143,7 +159,9 @@ app.put('/post',uploadMiddleWare.single('file'), async (req,res) => {
   
   });
   
-  
+app.get("/",async(req,res)=>{
+    res.json("hi")
+})
 app.get('/post/:id',async(req,res)=>{
     const {id}=req.params;
     const postDoc= await Post.findById(id).populate('author',['username']);
