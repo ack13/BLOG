@@ -3,7 +3,7 @@ const app=express();
 const cors=require('cors');
 const mongoose=require('mongoose')
 const User=require('./models/User');
-app.use(cors({credentials:true,origin:'http://localhost:3000'}));
+app.use(cors({credentials:true,origin:'*'}));
 const bcrypt=require("bcryptjs");
 app.use(express.json());
 const salt=bcrypt.genSaltSync(10);
